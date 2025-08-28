@@ -33,19 +33,25 @@ function enablePrediction(enabled) {
 }
 
 async function fetchDailyAdjusted(symbol) {
-  const url = `${BASE_URL}?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${encodeURIComponent(symbol)}&outputsize=full&apikey=${API_KEY}`;
+  const url = `${BASE_URL}?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${encodeURIComponent(symbol)}&outputsize=compact&datatype=json&apikey=${API_KEY}`;
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`Network error (${resp.status})`);
   const data = await resp.json();
   if (data['Error Message']) {
     throw new Error('Ticker not found. Please try another symbol.');
   }
+  if (data['Information']) {
+    throw new Error(`${data['Information']} Please try again later.`);
+  }
   if (data['Note']) {
-    throw new Error('Rate limit reached. Please wait a minute and try again.');
+    throw new Error('Rate limit reached. Please wait ~60 seconds and try again.');
   }
   const meta = data['Meta Data'];
   const series = data['Time Series (Daily)'];
-  if (!meta || !series) throw new Error('Unexpected API response.');
+  if (!meta || !series) {
+    const diagnostic = typeof data === 'object' ? Object.keys(data).join(', ') : 'unknown';
+    throw new Error(`Unexpected API response. Keys: ${diagnostic}`);
+  }
   return series;
 }
 
@@ -153,16 +159,15 @@ function renderInitial(state) {
 }
 
 function stepGame(state, guessUp) {
-  // Reveal next day relative to current date
-  const nextIndex = state.currentIndex + 1;
-  if (nextIndex + 1 >= state.allDatesAsc.length) {
+  // Reveal next day relative to current visible day (currentIndex)
+  if (state.currentIndex + 1 >= state.allDatesAsc.length) {
     setFeedback('No more data to continue. You reached the end.');
     enablePrediction(false);
     return state;
   }
 
-  const prevDate = state.allDatesAsc[nextIndex];
-  const nextDate = state.allDatesAsc[nextIndex + 1];
+  const prevDate = state.allDatesAsc[state.currentIndex];
+  const nextDate = state.allDatesAsc[state.currentIndex + 1];
   const prevPrice = parseFloat(state.series[prevDate]['5. adjusted close']);
   const nextPrice = parseFloat(state.series[nextDate]['5. adjusted close']);
 
@@ -178,7 +183,7 @@ function stepGame(state, guessUp) {
 
   updateChart(nextDate, nextPrice);
   currentDateEl.textContent = nextDate;
-  state.currentIndex = nextIndex;
+  state.currentIndex = state.currentIndex + 1;
   return state;
 }
 
