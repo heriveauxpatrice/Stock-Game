@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stock Prediction Game</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <header class="container">
+      <h1>Stock Prediction Game</h1>
+      <p class="subtitle">Guess if tomorrow's price will go up or down.</p>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <form id="ticker-form">
+          <label for="ticker">Enter a stock ticker (e.g., MSFT, COF):</label>
+          <div class="row">
+            <input id="ticker" name="ticker" type="text" placeholder="AAPL" autocomplete="off" required>
+            <button type="submit">Start</button>
+          </div>
+          <p id="error" class="error" role="alert" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="game" class="card hidden">
+        <div class="game-header">
+          <div>
+            <h2 id="symbol"></h2>
+            <p>Current date: <span id="current-date">-</span></p>
+          </div>
+          <div class="score-box">
+            <span>Score</span>
+            <strong id="score">0</strong>
+          </div>
+        </div>
+
+        <canvas id="chart" height="120"></canvas>
+
+        <div class="controls">
+          <p>Will the price go <strong>up</strong> or <strong>down</strong> tomorrow?</p>
+          <div class="row">
+            <button id="btn-up" class="primary" disabled>Up</button>
+            <button id="btn-down" class="secondary" disabled>Down</button>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button id="btn-end" class="secondary" disabled>End Game</button>
+          </div>
+          <p id="feedback" class="feedback" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section class="card info">
+        <details>
+          <summary>About</summary>
+          <p>
+            Data provided by Alpha Vantage. We fetch real daily adjusted closing prices
+            and simulate a day-by-day reveal starting from a random recent trading day.
+          </p>
+        </details>
+      </section>
+    </main>
+
+    <footer class="container footer">Made with ❤️ · <a href="https://www.alphavantage.co/" target="_blank" rel="noreferrer">Alpha Vantage</a></footer>
+  </body>
+  </html>
+
